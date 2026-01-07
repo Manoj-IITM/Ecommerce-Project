@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import { formatMoney } from '../../utils/money'
 import './Orders.css';
 import { Header } from '../../components/Header'
-import { Link } from 'react-router';
+import { NavLink } from 'react-router';
 import buyAgain from '../../assets/images/icons/buy-again.png';
 
 
@@ -14,10 +14,13 @@ export function Orders({cart}) {
     const [ orders,setOrders] = useState([]);
 
     useEffect(() => {
-        axios.get('/api/orders?expand=products')
-         .then((response) => {
+        const getOrders = async () => {
+            let response = await axios.get('/api/orders?expand=products')
+            console.log(response.data)
             setOrders(response.data)
-         });
+        }
+        
+        getOrders();
     }, []);
 
     return (
@@ -58,37 +61,35 @@ export function Orders({cart}) {
                                     {order.products.map((orderProduct) => {
                                         return (
                                             <Fragment key={orderProduct.id}>
-                                            <div  className="product-image-container">
-                                                <img src={orderProduct.product.image} />
+                                                <div  className="product-image-container">
+                                                    <img src={orderProduct.product.image} />
                                                 </div>
 
                                                 <div className="product-details">
-                                                <div className="product-name">
-                                                    {orderProduct.name}
-                                                </div>
-                                                <div className="product-delivery-date">
-                                                    Arriving on: {dayjs(orderProduct.estimatedDeliveryTimeMs).format('MMMM D')}
-                                                </div>
-                                                <div className="product-quantity">
-                                                    Quantity: {orderProduct.quantity}
-                                                </div>
-                                                <button className="buy-again-button button-primary">
-                                                    <img className="buy-again-icon" src={buyAgain} />
-                                                    <span className="buy-again-message">Add to Cart</span>
-                                                </button>
+                                                    <div className="product-name">
+                                                        {orderProduct.name}
+                                                    </div>
+                                                    <div className="product-delivery-date">
+                                                        Arriving on: {dayjs(orderProduct.estimatedDeliveryTimeMs).format('MMMM D')}
+                                                    </div>
+                                                    <div className="product-quantity">
+                                                        Quantity: {orderProduct.quantity}
+                                                    </div>
+                                                    <button className="buy-again-button button-primary">
+                                                        <img className="buy-again-icon" src={buyAgain} />
+                                                        <span className="buy-again-message">Add to Cart</span>
+                                                    </button>
                                                 </div>
 
                                                 <div className="product-actions">
-                                                <Link to="/tracking">
-                                                    <button className="track-package-button button-secondary">
-                                                    Track package
-                                                    </button>
-                                                </Link>
-                                            </div>
+                                                    <NavLink to={`/tracking/${order.id}/${orderProduct.product.id}`}>
+                                                        <button className="track-package-button button-secondary">
+                                                            Track package
+                                                        </button>
+                                                    </NavLink>
+                                                </div>
                                             
                                             </Fragment>
-
-
                                         );
                                     })}
                                     
