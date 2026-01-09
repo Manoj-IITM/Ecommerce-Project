@@ -3,6 +3,7 @@ import './HomePage.css';
 import { useEffect,useState } from 'react';
 import { Header } from '../../components/Header';
 import { ProductsGrid } from './productsGrid';
+import { useSearchParams } from 'react-router';
 
 
 
@@ -16,13 +17,19 @@ export function HomePage({cart,loadCart}) {
     // });
 
     const [ products,setProducts ] = useState([]);
-    
+    const [searchParams] = useSearchParams();
+    const search = searchParams.get('search');
     useEffect(() => {
-        axios.get('/api/products')
-        .then((response) => {
-            setProducts(response.data);
-        })
-    },[])
+        const urlPath = search ? `/api/products?search=${search}` : '/api/products'
+        const getHomeData = async () => {
+                await axios.get(urlPath)
+                    .then((response) => {
+                        setProducts(response.data);
+                })
+        }
+        getHomeData();
+        
+    },[search])
     
 
     return (
