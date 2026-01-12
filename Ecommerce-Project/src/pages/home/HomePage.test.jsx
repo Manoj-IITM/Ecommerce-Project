@@ -8,6 +8,7 @@ import { HomePage } from './HomePage'
 
 describe('HomePage Implementation',() => {
     let loadCart;
+    let user;
     beforeEach(() => {
         loadCart = vi.fn();
         vi.mock('axios');
@@ -41,6 +42,9 @@ describe('HomePage Implementation',() => {
                 }
             }
         })
+
+        user = userEvent.setup();
+
     });
     
     it('displays the product correctly', async () =>{
@@ -64,5 +68,46 @@ describe('HomePage Implementation',() => {
 
     });
 
+    it('checks for add to cart button',async () => {
 
-})
+        render(
+        <MemoryRouter>
+                <HomePage cart={[]} loadCart={loadCart} />
+        </MemoryRouter>
+        );
+
+        const productContainers = await screen.findAllByTestId('product-container')
+
+        const quantitySelector1 = within(productContainers[0]).getByTestId('quantity-selector')
+        await user.selectOptions(quantitySelector1,'2'); 
+
+        const quantitySelector2 = within(productContainers[1]).getByTestId('quantity-selector')
+        await user.selectOptions(quantitySelector2,'3');
+
+        const firstAddToCartButton = within(productContainers[0]).getByTestId('add-to-cart-button')
+        await user.click(firstAddToCartButton);
+
+        const secondAddToCartButton = within(productContainers[1]).getByTestId('add-to-cart-button')
+        await user.click(secondAddToCartButton);
+
+        
+        expect(axios.post).toHaveBeenNthCalledWith(1, '/api/cart-items', {
+                productId: 'e43638ce-6aa0-4b85-b27f-e1d07eb678c6',
+                quantity: "2"
+        });
+        expect(axios.post).toHaveBeenNthCalledWith(2, '/api/cart-items', {
+                productId: '15b6fc6f-327a-4ec4-896f-486349e85a3d',
+                quantity: "3"
+        });
+        expect(loadCart).toHaveBeenCalledTimes(2);
+
+
+
+
+    })
+
+
+
+
+
+});
